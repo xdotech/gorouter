@@ -1,0 +1,10 @@
+*.env
+.env
+coverage.out
+coverage.html
+logs/
+*.log
+
+
+/plans
+.claude
