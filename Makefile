@@ -7,7 +7,7 @@ build:
 	go build $(BUILD_FLAGS) -o $(BINARY) ./cmd/gorouter
 
 run: build
-	PORT=20128 ./$(BINARY)
+	PORT=14747 ./$(BINARY)
 
 test:
 	go test ./...
@@ -21,7 +21,7 @@ docker:
 	docker build -t gorouter .
 
 docker-run:
-	docker run -d --name gorouter -p 20128:20128 \
+	docker run -d --name gorouter -p 14747:14747 \
 		-v gorouter-data:/app/data \
 		-e JWT_SECRET=change-me \
 		-e INITIAL_PASSWORD=123456 \

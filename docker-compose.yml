@@ -2,14 +2,14 @@ services:
   gorouter:
     build: .
     ports:
-      - "20128:20128"
+      - "14747:14747"
     volumes:
       - gorouter-data:/app/data
     environment:
       - DATA_DIR=/app/data
       - JWT_SECRET=change-me-in-production
       - INITIAL_PASSWORD=123456
-      - PORT=20128
+      - PORT=14747
       - HOSTNAME=0.0.0.0
 
 volumes:
