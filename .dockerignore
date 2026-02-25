@@ -1,0 +1,8 @@
+.env
+*.env
+gorouter
+coverage.out
+coverage.html
+plans/
+.git/
+*.md
