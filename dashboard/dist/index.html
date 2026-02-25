@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoRouter Dashboard</title>
+    <link rel="stylesheet" href="/dashboard/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="brand">
+            <h2>GoRouter</h2>
+            <small>AI Routing Gateway</small>
+        </div>
+        <nav>
+            <a href="#" class="active" data-page="providers">Providers</a>
+            <a href="#" data-page="combos">Combos</a>
+            <a href="#" data-page="usage">Usage</a>
+            <a href="#" data-page="settings">Settings</a>
+        </nav>
+        <div class="bottom-nav">
+            <a href="#" id="btnLogout">Logout</a>
+        </div>
+    </div>
+
+    <main class="content">
+        <!-- Providers Page -->
+        <section id="page-providers" class="page active">
+            <div class="header">
+                <h2>Providers</h2>
+                <button class="btn btn-primary" id="btnAddProvider">+ Add Provider</button>
+            </div>
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Key</th>
+                            <th>Type</th>
+                            <th>Provider</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="providersList">
+                        <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Combos Page -->
+        <section id="page-combos" class="page">
+            <div class="header">
+                <h2>Model Combos</h2>
+                <button class="btn btn-primary" id="btnAddCombo">+ Add Combo</button>
+            </div>
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Combo Name</th>
+                            <th>Models Chain</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="combosList">
+                        <tr><td colspan="3" style="text-align: center;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Usage Page -->
+        <section id="page-usage" class="page">
+            <div class="header">
+                <h2>Usage Stats</h2>
+            </div>
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Provider</th>
+                            <th>Requests</th>
+                            <th>Tokens In</th>
+                            <th>Tokens Out</th>
+                            <th>Est. Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usageList">
+                        <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Settings Page -->
+        <section id="page-settings" class="page">
+            <div class="header">
+                <h2>Settings</h2>
+                <button class="btn btn-primary" id="btnSaveSettings">Save</button>
+            </div>
+            <div class="card">
+                <form id="settingsForm">
+                    <div class="form-group">
+                        <label>Require API Key for /v1 routes</label>
+                        <input type="checkbox" id="settingRequireKey">
+                    </div>
+                </form>
+            </div>
+            
+            <div class="header" style="margin-top: 2rem;">
+                <h2>API Keys</h2>
+                <button class="btn btn-secondary" id="btnGenerateKey">Generate New</button>
+            </div>
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Key Name</th>
+                            <th>Prefix</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="apiKeysList">
+                        <tr><td colspan="3" style="text-align: center;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h2 style="margin-top: 0;">Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Generic Template for Toasts -->
+    <div id="toast-container"></div>
+
+    <script src="/dashboard/app.js"></script>
+</body>
+</html>
