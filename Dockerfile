@@ -9,8 +9,8 @@ FROM alpine:3.19
 RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 COPY --from=builder /app/gorouter .
-EXPOSE 20128
-ENV PORT=20128
+EXPOSE 14747
+ENV PORT=14747
 ENV HOSTNAME=0.0.0.0
 VOLUME ["/app/data"]
 CMD ["./gorouter"]
