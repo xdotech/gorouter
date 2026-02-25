@@ -8,7 +8,7 @@ import (
 	"net/url"
 )
 
-//go:embed dist/*
+//go:embed all:dist
 var dashboardFS embed.FS
 
 // Handler serves the embedded dashboard UI from the dist folder.
