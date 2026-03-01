@@ -243,6 +243,17 @@ func refreshOnce(provider, refreshToken string) (*RefreshResult, error) {
 			ExpiresIn:    tokens.ExpiresIn,
 		}, nil
 
+	case "antigravity":
+		tokens, err := providers.RefreshAntigravityToken(refreshToken)
+		if err != nil {
+			return nil, err
+		}
+		return &RefreshResult{
+			AccessToken:  tokens.AccessToken,
+			RefreshToken: orDefault(tokens.RefreshToken, refreshToken),
+			ExpiresIn:    tokens.ExpiresIn,
+		}, nil
+
 	case "qwen":
 		at, rt, err := providers.RefreshQwenToken(refreshToken)
 		if err != nil {

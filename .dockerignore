@@ -5,4 +5,9 @@ coverage.out
 coverage.html
 plans/
 .git/
-*.md
+.github/
+.claude/
+.DS_Store
+*.jpg
+*.png
+*.webp

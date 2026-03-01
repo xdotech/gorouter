@@ -11,6 +11,7 @@ import (
 	"github.com/xuando/gorouter/internal/auth"
 	"github.com/xuando/gorouter/internal/db"
 	"github.com/xuando/gorouter/internal/executor"
+	"github.com/xuando/gorouter/internal/oauth"
 	"github.com/xuando/gorouter/internal/translator"
 	"github.com/xuando/gorouter/internal/usage"
 )
@@ -124,20 +125,49 @@ func (h *Handler) handleSingleModel(w http.ResponseWriter, ctx context.Context, 
 			return
 		}
 
-		// Handle auth refresh for OAuth providers.
-		if (result.StatusCode == 401 || result.StatusCode == 403) && exec.SupportsRefresh() {
-			result.Body.Close()
-			newCreds, refreshErr := exec.RefreshCredentials(ctx, creds)
-			if refreshErr == nil && newCreds != nil {
-				_ = h.store.UpdateProviderConnection(account.ConnectionID, map[string]interface{}{
-					"accessToken": newCreds.AccessToken,
-					"refreshToken": newCreds.RefreshToken,
-				})
-				result, err = exec.Execute(ctx, modelInfo.Provider, modelInfo.Model, translatedBytes, *newCreds)
-				if err != nil {
-					WriteError(w, http.StatusBadGateway, "upstream error after refresh: "+err.Error())
-					return
+		// Handle auth refresh for OAuth providers on 401/403.
+		if result.StatusCode == 401 || result.StatusCode == 403 {
+			refreshed := false
+
+			// Path 1: executor-level refresh (Claude Code, Gemini CLI).
+			if exec.SupportsRefresh() {
+				result.Body.Close()
+				newCreds, refreshErr := exec.RefreshCredentials(ctx, creds)
+				if refreshErr == nil && newCreds != nil {
+					_ = h.store.UpdateProviderConnection(account.ConnectionID, map[string]interface{}{
+						"accessToken":  newCreds.AccessToken,
+						"refreshToken": newCreds.RefreshToken,
+					})
+					result, err = exec.Execute(ctx, modelInfo.Provider, modelInfo.Model, translatedBytes, *newCreds)
+					if err != nil {
+						WriteError(w, http.StatusBadGateway, "upstream error after refresh: "+err.Error())
+						return
+					}
+					refreshed = true
 				}
+			}
+
+			// Path 2: oauth.ForceRefresh fallback (GitHub, iFlow, Qwen, Codex — any OAuth).
+			if !refreshed && account.RefreshToken != "" {
+				result.Body.Close()
+				conn, connErr := h.store.GetProviderConnection(account.ConnectionID)
+				if connErr == nil && conn != nil {
+					newToken, refreshErr := oauth.ForceRefresh(conn, h.store)
+					if refreshErr == nil && newToken != "" {
+						creds.AccessToken = newToken
+						result, err = exec.Execute(ctx, modelInfo.Provider, modelInfo.Model, translatedBytes, creds)
+						if err != nil {
+							WriteError(w, http.StatusBadGateway, "upstream error after oauth refresh: "+err.Error())
+							return
+						}
+						refreshed = true
+					}
+				}
+			}
+
+			// If we still haven't refreshed, close body for normal fallback flow.
+			if !refreshed {
+				// body is still open, will be read in non-success block below
 			}
 		}
 
@@ -270,6 +300,6 @@ type responseRecorder struct {
 	statusCode int
 }
 
-func (rr *responseRecorder) Header() http.Header        { return rr.header }
-func (rr *responseRecorder) WriteHeader(code int)       { rr.statusCode = code }
+func (rr *responseRecorder) Header() http.Header         { return rr.header }
+func (rr *responseRecorder) WriteHeader(code int)        { rr.statusCode = code }
 func (rr *responseRecorder) Write(b []byte) (int, error) { return rr.body.Write(b) }

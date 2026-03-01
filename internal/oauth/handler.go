@@ -127,6 +127,8 @@ func (h *Handler) buildAuthURL(provider, state, challenge string) (string, error
 		return providers.BuildIFlowAuthURL(h.baseURL, state, challenge), nil
 	case "cx":
 		return providers.BuildCodexAuthURL(h.baseURL, state, challenge), nil
+	case "ag":
+		return providers.BuildAntigravityAuthURL(h.baseURL, state, challenge), nil
 	default:
 		return "", fmt.Errorf("unsupported provider: %s", provider)
 	}
@@ -207,6 +209,20 @@ func (h *Handler) exchangeAndBuild(provider, code string, state *OAuthState) (*d
 		}
 		conn.Provider = "codex"
 		conn.Name = "OpenAI (Codex)"
+		conn.AccessToken = tokens.AccessToken
+		conn.RefreshToken = tokens.RefreshToken
+		if tokens.ExpiresIn > 0 {
+			conn.ExpiresAt = time.Now().Add(time.Duration(tokens.ExpiresIn) * time.Second).UTC().Format(time.RFC3339)
+		}
+
+	case "ag":
+		redirectURI := strings.Replace(providers.AntigravityRedirectURI, "{baseURL}", h.baseURL, 1)
+		tokens, err := providers.ExchangeAntigravityCode(code, state.PKCEVerifier, redirectURI)
+		if err != nil {
+			return nil, err
+		}
+		conn.Provider = "antigravity"
+		conn.Name = "Antigravity"
 		conn.AccessToken = tokens.AccessToken
 		conn.RefreshToken = tokens.RefreshToken
 		if tokens.ExpiresIn > 0 {
