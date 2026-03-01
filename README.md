@@ -7,7 +7,7 @@
 **GoRouter** is a single-binary AI routing gateway that auto-routes to free & cheap AI models with smart fallback — handling format translation, quota tracking, OAuth token refresh, and multi-account load balancing so you never hit a wall mid-session.
 
 > [!IMPORTANT]
-> **This repo is intended for local testing and development only.** OAuth login is provided for development convenience. For production, use provider API keys directly (OpenAI, Anthropic, Google, etc.) with proper key management and rate limiting.
+> **OAuth login is designed for personal development and local testing.** OAuth sessions may be subject to provider rate limits and session policies. For production or shared environments, we recommend using official API keys from each provider — they offer better stability, higher quotas, and are intended for programmatic access.
 
 ## What Makes It Different
 
