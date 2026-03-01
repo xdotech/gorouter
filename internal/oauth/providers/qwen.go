@@ -100,3 +100,43 @@ func PollQwenDeviceCode(deviceCode, codeVerifier string) (accessToken, refreshTo
 	}
 	return at, rt, nil
 }
+
+// RefreshQwenToken refreshes Qwen tokens using a refresh token.
+func RefreshQwenToken(refreshToken string) (accessToken, newRefreshToken string, err error) {
+	params := url.Values{
+		"grant_type":    {"refresh_token"},
+		"refresh_token": {refreshToken},
+		"client_id":     {QwenClientID},
+	}
+
+	req, err := http.NewRequest(http.MethodPost, QwenTokenURL, strings.NewReader(params.Encode()))
+	if err != nil {
+		return "", "", fmt.Errorf("build qwen refresh request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", "", fmt.Errorf("qwen refresh request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errBody map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errBody)
+		return "", "", fmt.Errorf("qwen token refresh failed (%d): %v", resp.StatusCode, errBody)
+	}
+
+	var data map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return "", "", fmt.Errorf("decode qwen refresh response: %w", err)
+	}
+
+	at, _ := data["access_token"].(string)
+	rt, _ := data["refresh_token"].(string)
+	if at == "" {
+		return "", "", fmt.Errorf("no access_token in qwen refresh response")
+	}
+	return at, rt, nil
+}

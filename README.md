@@ -7,7 +7,7 @@
 **GoRouter** is a single-binary AI routing gateway that auto-routes to free & cheap AI models with smart fallback — handling format translation, quota tracking, OAuth token refresh, and multi-account load balancing so you never hit a wall mid-session.
 
 > [!IMPORTANT]
-> **This repo is intended for local testing and development only.** OAuth login is provided for development convenience. For production, use provider API keys directly (OpenAI, Anthropic, Google, etc.) with proper key management and rate limiting.
+> **OAuth login is designed for personal development and local testing.** OAuth sessions may be subject to provider rate limits and session policies. For production or shared environments, we recommend using official API keys from each provider — they offer better stability, higher quotas, and are intended for programmatic access.
 
 ## What Makes It Different
 
@@ -222,43 +222,92 @@ GET  /v1/models              List all providers + combos
 <details>
 <summary><strong>Management API</strong></summary>
 
-```
-POST /api/auth/login
-POST /api/auth/logout
-GET  /api/init
+#### Authentication
 
-GET/PUT  /api/settings
-POST     /api/settings/require-login
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/auth/login` | Login with password, returns JWT session cookie |
+| `POST` | `/api/auth/logout` | Clear session cookie |
+| `GET` | `/api/init` | Check if initial setup is required (first run) |
 
-GET/POST        /api/providers
-GET/PUT/DELETE  /api/providers/{id}
-POST            /api/providers/{id}/test
-GET             /api/providers/{id}/models
-POST            /api/providers/validate
+#### Settings
 
-GET/POST        /api/combos
-PUT/DELETE      /api/combos/{id}
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/settings` | Get all runtime settings (fallback strategy, observability, etc.) |
+| `PUT` | `/api/settings` | Update runtime settings |
+| `POST` | `/api/settings/require-login` | Set initial password and enable login requirement |
 
-GET/POST   /api/keys
-DELETE     /api/keys/{id}
+#### Providers
 
-GET/POST   /api/models/alias
-DELETE     /api/models/alias/{alias}
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/providers` | List all provider connections (OAuth + API key) |
+| `POST` | `/api/providers` | Create a new provider connection (API key type) |
+| `GET` | `/api/providers/{id}` | Get a single provider connection by ID |
+| `PUT` | `/api/providers/{id}` | Update provider connection (name, priority, API key, etc.) |
+| `DELETE` | `/api/providers/{id}` | Delete a provider connection |
+| `POST` | `/api/providers/{id}/test` | Test if provider connection is alive (makes a small API call) |
+| `GET` | `/api/providers/{id}/models` | List available models for a provider |
+| `POST` | `/api/providers/validate` | Validate API key / credentials before saving |
 
-GET/POST        /api/provider-nodes
-PUT/DELETE      /api/provider-nodes/{id}
+#### Combos
 
-GET /api/usage/providers      # stats by provider
-GET /api/usage/request-logs   # paginated history
-GET /api/usage/stream         # SSE live feed
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/combos` | List all combo fallback chains |
+| `POST` | `/api/combos` | Create a new combo (named model sequence) |
+| `PUT` | `/api/combos/{id}` | Update combo name or model list |
+| `DELETE` | `/api/combos/{id}` | Delete a combo |
 
-GET/PUT /api/pricing
+#### API Keys
 
-GET  /api/oauth/{provider}/authorize
-GET  /api/oauth/{provider}/callback
-POST /api/oauth/{provider}/device-code
-POST /api/oauth/{provider}/poll
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/keys` | List all API keys for client authentication |
+| `POST` | `/api/keys` | Generate a new API key (with optional name/machine ID) |
+| `DELETE` | `/api/keys/{id}` | Revoke an API key |
+
+#### Model Aliases
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/models/alias` | List all model alias mappings |
+| `POST` | `/api/models/alias` | Create or update a model alias (e.g. `fast` → `gc/gemini-2.5-pro`) |
+| `DELETE` | `/api/models/alias/{alias}` | Delete a model alias |
+
+#### Provider Nodes
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/provider-nodes` | List custom OpenAI/Anthropic-compatible endpoints |
+| `POST` | `/api/provider-nodes` | Add a custom provider node (base URL, prefix, API type) |
+| `PUT` | `/api/provider-nodes/{id}` | Update a provider node |
+| `DELETE` | `/api/provider-nodes/{id}` | Delete a provider node |
+
+#### Usage & Analytics
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/usage/providers` | Aggregated stats by provider (requests, tokens, cost) |
+| `GET` | `/api/usage/request-logs` | Paginated request history with model, tokens, latency |
+| `GET` | `/api/usage/stream` | SSE live feed of requests in real-time |
+
+#### Pricing
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/pricing` | Get per-model pricing configuration |
+| `PUT` | `/api/pricing` | Update per-model pricing (cost per 1M tokens) |
+
+#### OAuth
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/oauth/{provider}/authorize` | Redirect to provider's OAuth page (cc, gc, cx, gh, if) |
+| `GET` | `/api/oauth/{provider}/callback` | OAuth callback — exchanges code for tokens, saves connection |
+| `POST` | `/api/oauth/{provider}/device-code` | Start device code flow (qw) — returns user code + verification URL |
+| `POST` | `/api/oauth/{provider}/poll` | Poll device code flow status until authorization completes |
 
 </details>
 
