@@ -1,16 +1,23 @@
 services:
   gorouter:
     build: .
+    container_name: gorouter
+    restart: unless-stopped
     ports:
-      - "14747:14747"
+      - "${PORT:-14747}:14747"
     volumes:
       - gorouter-data:/app/data
+    env_file:
+      - .env
     environment:
       - DATA_DIR=/app/data
-      - JWT_SECRET=change-me-in-production
-      - INITIAL_PASSWORD=123456
-      - PORT=14747
       - HOSTNAME=0.0.0.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:14747/api/init"]
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
 
 volumes:
   gorouter-data:

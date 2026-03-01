@@ -103,7 +103,17 @@ make build
 
 Point your CLI tool at `http://localhost:14747/v1` — done.
 
-### Option 2: Docker
+### Option 2: Docker Compose (Recommended)
+
+```bash
+git clone <repo> && cd gorouter
+cp .env.example .env   # edit JWT_SECRET and INITIAL_PASSWORD
+make up                # or: docker compose up -d
+```
+
+Open `http://localhost:14747/dashboard` → connect providers → start coding.
+
+### Option 3: Docker
 
 ```bash
 docker build -t gorouter .
@@ -112,15 +122,8 @@ docker run -d \
   -p 14747:14747 \
   -v gorouter-data:/app/data \
   -e JWT_SECRET=your-secret \
+  -e INITIAL_PASSWORD=your-password \
   gorouter
-```
-
-### Option 3: Docker Compose
-
-```bash
-cd deployments
-cp .env.example .env   # add your secrets
-docker compose up -d
 ```
 
 ## Configuration
@@ -364,9 +367,12 @@ dashboard/                 Embedded SPA (static files)
 ```bash
 make build        # compile binary
 make run          # build + run on :14747
-make test         # run tests
+make test         # run tests with race detector
 make test-cover   # coverage report
 make docker       # build Docker image
+make up           # docker compose up -d
+make down         # docker compose down
+make logs         # docker compose logs -f
 make clean        # remove build artifacts
 ```
 
