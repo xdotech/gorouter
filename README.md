@@ -5,7 +5,7 @@
 **GoRouter** is a single-binary AI routing gateway that auto-routes to free & cheap AI models with smart fallback — handling format translation, quota tracking, OAuth token refresh, and multi-account load balancing so you never hit a wall mid-session.
 
 > [!IMPORTANT]
-> **This repo is intended for local testing and development only.** For production usage, please use the hosted API at [api.xdo.tech](https://api.xdo.tech) which provides the same routing capabilities with managed infrastructure, higher availability, and zero setup.
+> **This repo is intended for local testing and development only.** OAuth login is provided for development convenience. For production, use provider API keys directly (OpenAI, Anthropic, Google, etc.) with proper key management and rate limiting.
 
 ## What Makes It Different
 
