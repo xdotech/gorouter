@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/xuando/gorouter/internal/config"
 	"github.com/xuando/gorouter/internal/db"
@@ -27,24 +26,40 @@ func NewHandler(store *db.Store, cfg *config.Config) *Handler {
 }
 
 // Routes returns a chi.Router with all OAuth routes mounted.
-func Routes(store *db.Store, cfg *config.Config) chi.Router {
+func Routes(store *db.Store, cfg *config.Config) *http.ServeMux {
 	h := NewHandler(store, cfg)
-	r := chi.NewRouter()
+	r := http.NewServeMux()
 
 	// PKCE authorize/callback (cc, gc, gh, if)
-	r.Get("/{provider}/authorize", h.Authorize)
-	r.Get("/{provider}/callback", h.Callback)
+	r.HandleFunc("GET /api/oauth/{provider}/authorize", h.authorizeHandler)
+	r.HandleFunc("GET /api/oauth/{provider}/callback", h.callbackHandler)
 
 	// Device code flows (qw)
-	r.Post("/{provider}/device-code", h.DeviceCode)
-	r.Post("/{provider}/poll", h.Poll)
+	r.HandleFunc("POST /api/oauth/{provider}/device-code", h.deviceCodeHandler)
+	r.HandleFunc("POST /api/oauth/{provider}/poll", h.pollHandler)
 
 	return r
 }
 
+func (h *Handler) authorizeHandler(w http.ResponseWriter, r *http.Request) {
+	h.Authorize(w, r)
+}
+
+func (h *Handler) callbackHandler(w http.ResponseWriter, r *http.Request) {
+	h.Callback(w, r)
+}
+
+func (h *Handler) deviceCodeHandler(w http.ResponseWriter, r *http.Request) {
+	h.DeviceCode(w, r)
+}
+
+func (h *Handler) pollHandler(w http.ResponseWriter, r *http.Request) {
+	h.Poll(w, r)
+}
+
 // Authorize redirects the user to the provider's OAuth authorization page.
 func (h *Handler) Authorize(w http.ResponseWriter, r *http.Request) {
-	provider := chi.URLParam(r, "provider")
+	provider := r.PathValue("provider")
 
 	pkce, err := GeneratePKCE()
 	if err != nil {
@@ -64,7 +79,7 @@ func (h *Handler) Authorize(w http.ResponseWriter, r *http.Request) {
 
 // Callback handles the OAuth callback, exchanges code for tokens, and saves to DB.
 func (h *Handler) Callback(w http.ResponseWriter, r *http.Request) {
-	provider := chi.URLParam(r, "provider")
+	provider := r.PathValue("provider")
 	code := r.URL.Query().Get("code")
 	stateID := r.URL.Query().Get("state")
 
@@ -110,6 +125,8 @@ func (h *Handler) buildAuthURL(provider, state, challenge string) (string, error
 		return providers.BuildGitHubAuthURL(h.baseURL, state), nil
 	case "if":
 		return providers.BuildIFlowAuthURL(h.baseURL, state, challenge), nil
+	case "cx":
+		return providers.BuildCodexAuthURL(h.baseURL, state, challenge), nil
 	default:
 		return "", fmt.Errorf("unsupported provider: %s", provider)
 	}
@@ -181,6 +198,20 @@ func (h *Handler) exchangeAndBuild(provider, code string, state *OAuthState) (*d
 		conn.Name = "iFlow"
 		conn.AccessToken = at
 		conn.RefreshToken = rt
+
+	case "cx":
+		redirectURI := strings.Replace(providers.CodexRedirectURI, "{baseURL}", h.baseURL, 1)
+		tokens, err := providers.ExchangeCodexCode(code, state.PKCEVerifier, redirectURI)
+		if err != nil {
+			return nil, err
+		}
+		conn.Provider = "codex"
+		conn.Name = "OpenAI (Codex)"
+		conn.AccessToken = tokens.AccessToken
+		conn.RefreshToken = tokens.RefreshToken
+		if tokens.ExpiresIn > 0 {
+			conn.ExpiresAt = time.Now().Add(time.Duration(tokens.ExpiresIn) * time.Second).UTC().Format(time.RFC3339)
+		}
 
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)

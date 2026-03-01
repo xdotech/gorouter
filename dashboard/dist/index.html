@@ -1,151 +1,383 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GoRouter Dashboard</title>
-    <link rel="stylesheet" href="/dashboard/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoRouter Dashboard</title>
+  <link rel="stylesheet" href="/dashboard/style.css">
 </head>
+
 <body>
-    <div class="sidebar">
-        <div class="brand">
-            <h2>GoRouter</h2>
-            <small>AI Routing Gateway</small>
-        </div>
-        <nav>
-            <a href="#" class="active" data-page="providers">Providers</a>
-            <a href="#" data-page="combos">Combos</a>
-            <a href="#" data-page="usage">Usage</a>
-            <a href="#" data-page="settings">Settings</a>
-        </nav>
-        <div class="bottom-nav">
-            <a href="#" id="btnLogout">Logout</a>
-        </div>
+  <!-- Header -->
+  <header class="header-bar">
+    <div class="brand">
+      <span class="material-symbols-outlined">hub</span>
+      <span>GoRouter</span>
     </div>
+  </header>
 
-    <main class="content">
-        <!-- Providers Page -->
-        <section id="page-providers" class="page active">
-            <div class="header">
-                <h2>Providers</h2>
-                <button class="btn btn-primary" id="btnAddProvider">+ Add Provider</button>
-            </div>
-            <div class="card">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Key</th>
-                            <th>Type</th>
-                            <th>Provider</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="providersList">
-                        <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="nav-group">
+        <div class="nav-label">Overview</div>
+        <button class="nav-item active" data-page="dashboard">
+          <span class="material-symbols-outlined">dashboard</span> Dashboard
+        </button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Routing</div>
+        <button class="nav-item" data-page="providers">
+          <span class="material-symbols-outlined">cloud</span> Providers
+        </button>
+        <button class="nav-item" data-page="combos">
+          <span class="material-symbols-outlined">layers</span> Combos
+        </button>
+        <button class="nav-item" data-page="aliases">
+          <span class="material-symbols-outlined">label</span> Model Aliases
+        </button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Security</div>
+        <button class="nav-item" data-page="keys">
+          <span class="material-symbols-outlined">key</span> API Keys
+        </button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Analytics</div>
+        <button class="nav-item" data-page="usage">
+          <span class="material-symbols-outlined">analytics</span> Usage
+        </button>
+        <button class="nav-item" data-page="pricing">
+          <span class="material-symbols-outlined">payments</span> Pricing
+        </button>
+      </div>
+      <div class="nav-bottom">
+        <button class="nav-item" data-page="settings">
+          <span class="material-symbols-outlined">settings</span> Settings
+        </button>
+      </div>
+    </aside>
 
-        <!-- Combos Page -->
-        <section id="page-combos" class="page">
-            <div class="header">
-                <h2>Model Combos</h2>
-                <button class="btn btn-primary" id="btnAddCombo">+ Add Combo</button>
-            </div>
-            <div class="card">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Combo Name</th>
-                            <th>Models Chain</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="combosList">
-                        <tr><td colspan="3" style="text-align: center;">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+    <!-- Main Content -->
+    <main class="main-content">
 
-        <!-- Usage Page -->
-        <section id="page-usage" class="page">
-            <div class="header">
-                <h2>Usage Stats</h2>
-            </div>
-            <div class="card">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Provider</th>
-                            <th>Requests</th>
-                            <th>Tokens In</th>
-                            <th>Tokens Out</th>
-                            <th>Est. Cost</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usageList">
-                        <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+      <!-- ═══ Dashboard ═══ -->
+      <section id="page-dashboard" class="page active">
+        <div class="page-header">
+          <div>
+            <h2>Dashboard</h2>
+            <p>AI routing gateway overview</p>
+          </div>
+        </div>
+        <div class="kpi-grid" id="dashboardKpis"></div>
+      </section>
 
-        <!-- Settings Page -->
-        <section id="page-settings" class="page">
-            <div class="header">
-                <h2>Settings</h2>
-                <button class="btn btn-primary" id="btnSaveSettings">Save</button>
-            </div>
-            <div class="card">
-                <form id="settingsForm">
-                    <div class="form-group">
-                        <label>Require API Key for /v1 routes</label>
-                        <input type="checkbox" id="settingRequireKey">
-                    </div>
-                </form>
-            </div>
-            
-            <div class="header" style="margin-top: 2rem;">
-                <h2>API Keys</h2>
-                <button class="btn btn-secondary" id="btnGenerateKey">Generate New</button>
-            </div>
-            <div class="card">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Key Name</th>
-                            <th>Prefix</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="apiKeysList">
-                        <tr><td colspan="3" style="text-align: center;">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+      <!-- ═══ Providers ═══ -->
+      <section id="page-providers" class="page">
+        <div class="page-header">
+          <div>
+            <h2>Providers</h2>
+            <p>Manage AI provider connections</p>
+          </div>
+          <button class="btn btn-primary" id="btnAddProvider">
+            <span class="material-symbols-outlined">add</span> Add Provider
+          </button>
+        </div>
+        <div class="oauth-section">
+          <h4>Quick Connect via OAuth</h4>
+          <div class="oauth-grid">
+            <a class="oauth-btn" href="/api/oauth/cc/authorize" target="_blank">
+              <span class="material-symbols-outlined">smart_toy</span> Claude Code
+            </a>
+            <a class="oauth-btn" href="/api/oauth/gc/authorize" target="_blank">
+              <span class="material-symbols-outlined">auto_awesome</span> Gemini CLI
+            </a>
+            <a class="oauth-btn" href="/api/oauth/cx/authorize" target="_blank">
+              <span class="material-symbols-outlined">psychology</span> OpenAI
+            </a>
+            <a class="oauth-btn" href="/api/oauth/gh/authorize" target="_blank">
+              <span class="material-symbols-outlined">code</span> GitHub Copilot
+            </a>
+            <a class="oauth-btn" href="/api/oauth/if/authorize" target="_blank">
+              <span class="material-symbols-outlined">bolt</span> iFlow
+            </a>
+            <button class="oauth-btn" id="btnQwenDevice">
+              <span class="material-symbols-outlined">devices</span> Qwen (Device Code)
+            </button>
+          </div>
+        </div>
+        <div class="provider-grid" id="providerGrid"></div>
+      </section>
+
+      <!-- ═══ Combos ═══ -->
+      <section id="page-combos" class="page">
+        <div class="page-header">
+          <div>
+            <h2>Combos</h2>
+            <p>Model fallback chains</p>
+          </div>
+          <button class="btn btn-primary" id="btnAddCombo">
+            <span class="material-symbols-outlined">add</span> Add Combo
+          </button>
+        </div>
+        <div class="card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Models Chain</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="combosList">
+              <tr class="empty-row">
+                <td colspan="3">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══ Model Aliases ═══ -->
+      <section id="page-aliases" class="page">
+        <div class="page-header">
+          <div>
+            <h2>Model Aliases</h2>
+            <p>Short names for model paths</p>
+          </div>
+          <button class="btn btn-primary" id="btnAddAlias">
+            <span class="material-symbols-outlined">add</span> Add Alias
+          </button>
+        </div>
+        <div class="card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Alias</th>
+                <th>Target Model</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="aliasesList">
+              <tr class="empty-row">
+                <td colspan="3">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══ API Keys ═══ -->
+      <section id="page-keys" class="page">
+        <div class="page-header">
+          <div>
+            <h2>API Keys</h2>
+            <p>Manage gateway access keys</p>
+          </div>
+          <button class="btn btn-primary" id="btnGenerateKey">
+            <span class="material-symbols-outlined">add</span> Generate Key
+          </button>
+        </div>
+        <div class="card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Key</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="keysList">
+              <tr class="empty-row">
+                <td colspan="4">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══ Usage ═══ -->
+      <section id="page-usage" class="page">
+        <div class="page-header">
+          <div>
+            <h2>Usage</h2>
+            <p>Request analytics and cost tracking</p>
+          </div>
+        </div>
+        <div class="kpi-grid" id="usageKpis"></div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Request Log</h3>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Provider</th>
+                <th>Model</th>
+                <th>Tokens</th>
+                <th>Status</th>
+                <th>Duration</th>
+              </tr>
+            </thead>
+            <tbody id="requestLogList">
+              <tr class="empty-row">
+                <td colspan="6">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination" id="logPagination"></div>
+        </div>
+      </section>
+
+      <!-- ═══ Pricing ═══ -->
+      <section id="page-pricing" class="page">
+        <div class="page-header">
+          <div>
+            <h2>Pricing</h2>
+            <p>Cost per 1M tokens by model</p>
+          </div>
+          <button class="btn btn-primary" id="btnSavePricing">
+            <span class="material-symbols-outlined">save</span> Save
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-body" id="pricingEditor"></div>
+        </div>
+      </section>
+
+      <!-- ═══ Settings ═══ -->
+      <section id="page-settings" class="page">
+        <div class="page-header">
+          <div>
+            <h2>Settings</h2>
+            <p>Gateway configuration</p>
+          </div>
+          <button class="btn btn-primary" id="btnSaveSettings">
+            <span class="material-symbols-outlined">save</span> Save
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-body" id="settingsForm"></div>
+        </div>
+      </section>
+
     </main>
+  </div>
 
-    <!-- Login Modal -->
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <h2 style="margin-top: 0;">Login</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="loginPassword" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Login</button>
-            </form>
-        </div>
+  <!-- ═══ Modals ═══ -->
+
+  <!-- Login Modal -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Login to GoRouter</h3>
+        <div></div>
+      </div>
+      <div class="modal-body">
+        <form id="loginForm">
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPassword" class="form-control" required placeholder="Enter password">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%">Login</button>
+        </form>
+      </div>
     </div>
+  </div>
 
-    <!-- Generic Template for Toasts -->
-    <div id="toast-container"></div>
+  <!-- Add Provider Modal -->
+  <div class="modal-overlay" id="providerModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="providerModalTitle">Add Provider</h3>
+        <button class="modal-close" onclick="closeModal('providerModal')"><span
+            class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Provider</label>
+          <select id="providerType" class="form-control">
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic</option>
+            <option value="openrouter">OpenRouter</option>
+            <option value="glm">GLM (Zhipu)</option>
+            <option value="minimax">MiniMax</option>
+            <option value="kimi">Kimi (Moonshot)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="providerName" class="form-control" placeholder="My OpenAI Key">
+        </div>
+        <div class="form-group">
+          <label>API Key</label>
+          <input type="text" id="providerKey" class="form-control" placeholder="sk-...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('providerModal')">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveProvider">Save</button>
+      </div>
+    </div>
+  </div>
 
-    <script src="/dashboard/app.js"></script>
+  <!-- Add Combo Modal -->
+  <div class="modal-overlay" id="comboModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Add Combo</h3>
+        <button class="modal-close" onclick="closeModal('comboModal')"><span
+            class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Combo Name</label>
+          <input type="text" id="comboName" class="form-control" placeholder="my-stack">
+        </div>
+        <div class="form-group">
+          <label>Models (one per line, provider/model)</label>
+          <textarea id="comboModels" class="form-control"
+            placeholder="cc/claude-opus-4-6&#10;glm/glm-4.7&#10;if/kimi-k2-thinking"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('comboModal')">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveCombo">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Alias Modal -->
+  <div class="modal-overlay" id="aliasModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Add Alias</h3>
+        <button class="modal-close" onclick="closeModal('aliasModal')"><span
+            class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Alias</label>
+          <input type="text" id="aliasName" class="form-control" placeholder="opus">
+        </div>
+        <div class="form-group">
+          <label>Target Model</label>
+          <input type="text" id="aliasTarget" class="form-control" placeholder="cc/claude-opus-4-6">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('aliasModal')">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveAlias">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="/dashboard/app.js"></script>
 </body>
+
 </html>

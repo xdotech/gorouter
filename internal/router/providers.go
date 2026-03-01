@@ -2,18 +2,19 @@ package router
 
 // providerAliases maps short aliases to canonical provider IDs.
 var providerAliases = map[string]string{
-	"cc":       "claude-code",
-	"cx":       "codex",
-	"gc":       "gemini-cli",
-	"gh":       "github",
-	"if":       "iflow",
-	"qw":       "qwen",
-	"kr":       "kiro",
-	"glm":      "glm",
-	"minimax":  "minimax",
-	"kimi":     "kimi",
-	"kc":       "kilocode",
-	"ag":       "antigravity",
+	"cc":      "claude-code",
+	"cx":      "codex",
+	"gc":      "gemini-cli",
+	"gh":      "github",
+	"if":      "iflow",
+	"qw":      "qwen",
+	"kr":      "kiro",
+	"glm":     "glm",
+	"minimax": "minimax",
+	"kimi":    "kimi",
+	"kc":      "kilocode",
+	"ag":      "antigravity",
+	"openai":  "codex",
 }
 
 // resolveProvider returns the canonical provider ID for a given alias or ID.
@@ -34,6 +35,7 @@ func ResolveProviderForExecutor(provider string) string {
 		"claude-code": "cc",
 		"gemini-cli":  "gc",
 		"github":      "gh",
+		"codex":       "cx",
 	}
 	if alias, ok := canonicalToAlias[provider]; ok {
 		return alias
