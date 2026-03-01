@@ -1,5 +1,7 @@
 # GoRouter
 
+![GoRouter — AI Routing Gateway](gorouter.jpg)
+
 [![Go](https://img.shields.io/badge/Go_1.25+-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev/) [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://hub.docker.com/) [![OpenAI](https://img.shields.io/badge/OpenAI_Compatible-412991?style=flat-square&logo=openai&logoColor=white)](https://openai.com/) [![Anthropic](https://img.shields.io/badge/Anthropic-191919?style=flat-square&logo=anthropic&logoColor=white)](https://www.anthropic.com/) [![Gemini](https://img.shields.io/badge/Gemini-4285F4?style=flat-square&logo=google&logoColor=white)](https://ai.google.dev/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
 **GoRouter** is a single-binary AI routing gateway that auto-routes to free & cheap AI models with smart fallback — handling format translation, quota tracking, OAuth token refresh, and multi-account load balancing so you never hit a wall mid-session.
@@ -13,7 +15,7 @@
 - **Combo Fallback Chains** — Name a stack of models (e.g. `cc/opus → glm/glm-4.7 → if/kimi`) and GoRouter auto-falls through on quota/rate errors
 - **Format Translation** — Accepts OpenAI format, translates to Claude Messages API or Gemini on the fly, translates streaming responses back
 - **Account-Level Routing** — Multiple accounts per provider with fill-first or round-robin strategies and 5-level exponential backoff
-- **Native HTTP Gateway** — Pure Go, `http.ServeMux` (Go 1.22+), no framework dependencies, ~15MB binary
+- **Native HTTP Gateway** — Pure Go, `http.ServeMux` (Go 1.25+), no framework dependencies, ~15MB binary
 - **ServiceGroup Lifecycle** — Concurrent startup and reverse-order graceful shutdown with signal handling
 
 ## Architecture
@@ -82,7 +84,7 @@ graph TB
 
 ### Infrastructure
 - **Pure Go** — No cgo, no framework dependencies, easy cross-compilation
-- **Native HTTP** — `http.ServeMux` (Go 1.22+) with method+path patterns, custom middleware stack
+- **Native HTTP** — `http.ServeMux` (Go 1.25+) with method+path patterns, custom middleware stack
 - **ServiceGroup** — Concurrent startup, LIFO graceful shutdown, SIGINT/SIGTERM handling
 - **Clean Architecture** — Domain interfaces (`domain/store.go`) with JSON file implementation
 - **Embedded Dashboard** — SPA served from embedded filesystem
