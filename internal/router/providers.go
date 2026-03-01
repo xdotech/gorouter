@@ -36,6 +36,7 @@ func ResolveProviderForExecutor(provider string) string {
 		"gemini-cli":  "gc",
 		"github":      "gh",
 		"codex":       "cx",
+		"antigravity": "gc", // same executor as Gemini CLI (Cloud Code API)
 	}
 	if alias, ok := canonicalToAlias[provider]; ok {
 		return alias
