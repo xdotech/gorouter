@@ -1,19 +1,19 @@
 package main
 
 import (
+	"context"
 	"log"
-	"net/http"
 	"os"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/xuando/gorouter/dashboard"
-	"github.com/xuando/gorouter/internal/api"
-	"github.com/xuando/gorouter/internal/config"
-	"github.com/xuando/gorouter/internal/db"
-	"github.com/xuando/gorouter/internal/executor"
-	"github.com/xuando/gorouter/internal/router"
-	"github.com/xuando/gorouter/internal/server"
-	"github.com/xuando/gorouter/internal/usage"
+	"github.com/xdotech/gorouter/internal/config"
+	"github.com/xdotech/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/domain"
+	"github.com/xdotech/gorouter/internal/executor"
+	"github.com/xdotech/gorouter/internal/gateway"
+	"github.com/xdotech/gorouter/internal/lifecycle"
+	"github.com/xdotech/gorouter/internal/logging"
+	"github.com/xdotech/gorouter/internal/storage/jsonfile"
+	"github.com/xdotech/gorouter/internal/usage"
 )
 
 func main() {
@@ -21,55 +21,42 @@ func main() {
 
 	cfg := config.Load()
 
-	store, err := db.New(cfg.DataDir)
+	logging.Setup("info")
+	logger := logging.FromContext(context.Background())
+	logger.Info("initializing gorouter")
+
+	// ─── Legacy Store (used by router.Handler and oauth) ─────────────
+	dbStore, err := db.New(cfg.DataDir)
 	if err != nil {
 		log.Fatalf("open db: %v", err)
 	}
 
+	// ─── Domain Stores (used by gateway handlers) ─────────────────────
+	_, stores, err := jsonfile.New(cfg.DataDir)
+	if err != nil {
+		log.Fatalf("open domain stores: %v", err)
+	}
+
+	// ─── Usage ────────────────────────────────────────────────────────
 	usageDB, err := usage.NewDB(cfg.DataDir, 1000)
 	if err != nil {
 		log.Fatalf("open usage db: %v", err)
 	}
-	logger := usage.NewLogger(cfg.DataDir)
-	tracker := usage.NewTracker(usageDB, logger, nil)
+	usageLogger := usage.NewLogger(cfg.DataDir)
+	tracker := usage.NewTracker(usageDB, usageLogger, nil)
 
+	// ─── Executors ────────────────────────────────────────────────────
 	executor.Init(cfg)
 
-	h := router.NewHandler(store, tracker)
+	// ─── Gateway Server ───────────────────────────────────────────────
+	srv := gateway.NewServer(cfg, stores, dbStore, tracker, usageDB)
 
-	srv := server.New(cfg)
-	srv.Mount(func(r chi.Router) {
-		r.Get("/health", func(w http.ResponseWriter, _ *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"status":"ok","service":"gorouter"}`))
-		})
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			http.Redirect(w, r, "/dashboard", http.StatusTemporaryRedirect)
-		})
+	// ─── Service Group ────────────────────────────────────────────────
+	sg := lifecycle.NewServiceGroup()
+	sg.Add(srv)
 
-		// Dashboard UI
-		dashboardURL := os.Getenv("DASHBOARD_URL")
-		var dash http.Handler
-		if dashboardURL != "" {
-			dash = dashboard.Proxy(dashboardURL)
-		} else {
-			dash = http.StripPrefix("/dashboard", dashboard.Handler())
-		}
-		r.Handle("/dashboard", dash)
-		r.Handle("/dashboard/*", dash)
-
-		// Management API
-		r.Mount("/api", api.NewRouter(store, cfg, usageDB))
-
-		// OpenAI-compatible routing endpoints
-		r.Post("/v1/chat/completions", h.HandleChat)
-		r.Post("/v1/messages", h.HandleChat)
-		r.Post("/v1/responses", h.HandleChat)
-		r.Get("/v1/models", h.HandleModels)
-		r.Get("/v1beta/models", h.HandleModels)
-	})
-
-	if err := srv.Start(); err != nil {
+	logger.Info("starting gorouter", "addr", ":"+cfg.Port)
+	if err := sg.Start(context.Background()); err != nil {
 		log.Fatalf("server error: %v", err)
 	}
 }
@@ -114,3 +101,6 @@ func splitLines(data []byte) []string {
 	}
 	return lines
 }
+
+// Ensure domain.Stores is used (prevents "imported and not used" error).
+var _ = (*domain.Stores)(nil)

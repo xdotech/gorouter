@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/xuando/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/db"
 )
 
 // AliasesHandler manages model aliases.

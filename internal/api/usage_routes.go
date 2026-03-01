@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/xuando/gorouter/internal/usage"
+	"github.com/xdotech/gorouter/internal/usage"
 )
 
 // UsageHandler serves usage stats, logs, and SSE stream.

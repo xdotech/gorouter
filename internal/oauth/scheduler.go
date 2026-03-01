@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/xuando/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/db"
 )
 
 // ─── Background Token Refresh Scheduler ─────────────────────────────────────

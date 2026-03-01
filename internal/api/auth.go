@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/xuando/gorouter/internal/auth"
-	"github.com/xuando/gorouter/internal/config"
-	"github.com/xuando/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/auth"
+	"github.com/xdotech/gorouter/internal/config"
+	"github.com/xdotech/gorouter/internal/db"
 )
 
 // AuthHandler handles login and logout.

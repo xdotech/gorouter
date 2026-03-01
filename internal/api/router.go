@@ -4,11 +4,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/xuando/gorouter/internal/auth"
-	"github.com/xuando/gorouter/internal/config"
-	"github.com/xuando/gorouter/internal/db"
-	"github.com/xuando/gorouter/internal/oauth"
-	"github.com/xuando/gorouter/internal/usage"
+	"github.com/xdotech/gorouter/internal/auth"
+	"github.com/xdotech/gorouter/internal/config"
+	"github.com/xdotech/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/oauth"
+	"github.com/xdotech/gorouter/internal/usage"
 )
 
 // NewRouter builds and returns a chi.Router mounted at /api.

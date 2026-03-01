@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/xuando/gorouter/internal/translator/types"
+	"github.com/xdotech/gorouter/internal/translator/types"
 )
 
 // toolCallState tracks a buffered tool_use block during streaming.

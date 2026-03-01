@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/xuando/gorouter/internal/config"
-	"github.com/xuando/gorouter/internal/db"
-	"github.com/xuando/gorouter/internal/domain"
-	"github.com/xuando/gorouter/internal/logging"
-	"github.com/xuando/gorouter/internal/oauth"
-	"github.com/xuando/gorouter/internal/router"
-	"github.com/xuando/gorouter/internal/usage"
+	"github.com/xdotech/gorouter/internal/config"
+	"github.com/xdotech/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/domain"
+	"github.com/xdotech/gorouter/internal/logging"
+	"github.com/xdotech/gorouter/internal/oauth"
+	"github.com/xdotech/gorouter/internal/router"
+	"github.com/xdotech/gorouter/internal/usage"
 )
 
 // Server represents the HTTP gateway server.

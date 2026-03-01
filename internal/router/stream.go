@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/xuando/gorouter/internal/translator/types"
+	"github.com/xdotech/gorouter/internal/translator/types"
 )
 
 // StreamResponse pipes upstream SSE body to the client, applying translation.

@@ -3,7 +3,7 @@ package router
 import (
 	"strings"
 
-	"github.com/xuando/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/db"
 )
 
 // ModelInfo holds resolved provider and model name.

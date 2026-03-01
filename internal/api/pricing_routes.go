@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"github.com/xuando/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/db"
 )
 
 // PricingHandler handles pricing config.

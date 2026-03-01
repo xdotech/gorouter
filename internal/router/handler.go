@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/xuando/gorouter/internal/auth"
-	"github.com/xuando/gorouter/internal/db"
-	"github.com/xuando/gorouter/internal/executor"
-	"github.com/xuando/gorouter/internal/oauth"
-	"github.com/xuando/gorouter/internal/translator"
-	"github.com/xuando/gorouter/internal/usage"
+	"github.com/xdotech/gorouter/internal/auth"
+	"github.com/xdotech/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/executor"
+	"github.com/xdotech/gorouter/internal/oauth"
+	"github.com/xdotech/gorouter/internal/translator"
+	"github.com/xdotech/gorouter/internal/usage"
 )
 
 // Handler is the main routing handler wiring model resolution, account selection, and execution.

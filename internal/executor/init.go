@@ -1,7 +1,7 @@
 package executor
 
 import (
-	"github.com/xuando/gorouter/internal/config"
+	"github.com/xdotech/gorouter/internal/config"
 )
 
 // Init registers all provider executors.

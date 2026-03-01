@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/xuando/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/db"
 )
 
 // ProvidersHandler handles provider connection CRUD.

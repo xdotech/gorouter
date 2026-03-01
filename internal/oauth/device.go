@@ -6,15 +6,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/xuando/gorouter/internal/db"
-	"github.com/xuando/gorouter/internal/oauth/providers"
+	"github.com/xdotech/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/oauth/providers"
 )
 
 // DeviceCode initiates a device code flow for supported providers (qw).
 func (h *Handler) DeviceCode(w http.ResponseWriter, r *http.Request) {
-	provider := chi.URLParam(r, "provider")
+	provider := r.PathValue("provider")
 
 	switch provider {
 	case "qw":
@@ -26,7 +25,7 @@ func (h *Handler) DeviceCode(w http.ResponseWriter, r *http.Request) {
 
 // Poll polls a device code flow for token completion.
 func (h *Handler) Poll(w http.ResponseWriter, r *http.Request) {
-	provider := chi.URLParam(r, "provider")
+	provider := r.PathValue("provider")
 
 	switch provider {
 	case "qw":

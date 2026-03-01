@@ -1,6 +1,6 @@
 package translator
 
-import "github.com/xuando/gorouter/internal/translator/types"
+import "github.com/xdotech/gorouter/internal/translator/types"
 
 // Re-export types from sub-package for external consumers.
 type SSEEvent = types.SSEEvent

@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/xuando/gorouter/internal/config"
+	"github.com/xdotech/gorouter/internal/config"
 )
 
 type Server struct {

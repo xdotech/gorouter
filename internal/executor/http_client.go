@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/xuando/gorouter/internal/config"
+	"github.com/xdotech/gorouter/internal/config"
 )
 
 // NewHTTPClient builds a shared HTTP client with proxy support and SSE-friendly settings.

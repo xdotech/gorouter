@@ -3,9 +3,9 @@ package translator
 import (
 	"fmt"
 
-	"github.com/xuando/gorouter/internal/translator/request"
-	"github.com/xuando/gorouter/internal/translator/response"
-	"github.com/xuando/gorouter/internal/translator/types"
+	"github.com/xdotech/gorouter/internal/translator/request"
+	"github.com/xdotech/gorouter/internal/translator/response"
+	"github.com/xdotech/gorouter/internal/translator/types"
 )
 
 // TranslateRequest translates a request body from sourceFormat to targetFormat.

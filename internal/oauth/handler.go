@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/xuando/gorouter/internal/config"
-	"github.com/xuando/gorouter/internal/db"
-	"github.com/xuando/gorouter/internal/oauth/providers"
+	"github.com/xdotech/gorouter/internal/config"
+	"github.com/xdotech/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/oauth/providers"
 )
 
 // Handler holds dependencies for OAuth HTTP handlers.

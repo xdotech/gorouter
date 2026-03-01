@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"github.com/xuando/gorouter/internal/config"
-	"github.com/xuando/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/config"
+	"github.com/xdotech/gorouter/internal/db"
 )
 
 // SettingsHandler handles settings and init routes.
