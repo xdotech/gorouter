@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/xuando/gorouter/dashboard"
 	"github.com/xuando/gorouter/internal/api"
 	"github.com/xuando/gorouter/internal/config"
 	"github.com/xuando/gorouter/internal/db"
@@ -46,13 +47,13 @@ func main() {
 			http.Redirect(w, r, "/dashboard", http.StatusTemporaryRedirect)
 		})
 
-		// Dashboard UI (proxy to Next.js dev server or placeholder)
+		// Dashboard UI
 		dashboardURL := os.Getenv("DASHBOARD_URL")
 		var dash http.Handler
 		if dashboardURL != "" {
-			dash = server.DashboardProxy(dashboardURL)
+			dash = dashboard.Proxy(dashboardURL)
 		} else {
-			dash = server.DashboardPlaceholder()
+			dash = http.StripPrefix("/dashboard", dashboard.Handler())
 		}
 		r.Handle("/dashboard", dash)
 		r.Handle("/dashboard/*", dash)

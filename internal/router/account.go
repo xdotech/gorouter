@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/xuando/gorouter/internal/db"
+	"github.com/xuando/gorouter/internal/oauth"
 )
 
 var selectionMu sync.Mutex
@@ -84,8 +85,8 @@ func SelectAccount(provider, excludeID, model string, store *db.Store) (*Selecte
 
 	// Update last used and consecutive count.
 	_ = store.UpdateProviderConnection(chosen.ID, map[string]interface{}{
-		"lastUsedAt":           db.Now(),
-		"consecutiveUseCount":  chosen.ConsecutiveUseCount + 1,
+		"lastUsedAt":          db.Now(),
+		"consecutiveUseCount": chosen.ConsecutiveUseCount + 1,
 	})
 
 	copilotToken := ""
@@ -95,10 +96,19 @@ func SelectAccount(provider, excludeID, model string, store *db.Store) (*Selecte
 		}
 	}
 
+	// Auto-refresh OAuth tokens if expired/expiring.
+	accessToken := chosen.AccessToken
+	if chosen.AuthType == "oauth" && chosen.RefreshToken != "" {
+		freshToken, err := oauth.EnsureFreshToken(&chosen, store)
+		if err == nil {
+			accessToken = freshToken
+		}
+	}
+
 	return &SelectedAccount{
 		ConnectionID:         chosen.ID,
 		APIKey:               chosen.APIKey,
-		AccessToken:          chosen.AccessToken,
+		AccessToken:          accessToken,
 		RefreshToken:         chosen.RefreshToken,
 		ExpiresAt:            chosen.ExpiresAt,
 		ProjectID:            chosen.ProjectID,
