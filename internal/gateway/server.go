@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/xuando/gorouter/internal/config"
-	"github.com/xuando/gorouter/internal/db"
-	"github.com/xuando/gorouter/internal/domain"
-	"github.com/xuando/gorouter/internal/logging"
-	"github.com/xuando/gorouter/internal/oauth"
-	"github.com/xuando/gorouter/internal/router"
-	"github.com/xuando/gorouter/internal/usage"
+	"github.com/xdotech/gorouter/internal/config"
+	"github.com/xdotech/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/domain"
+	"github.com/xdotech/gorouter/internal/logging"
+	"github.com/xdotech/gorouter/internal/oauth"
+	"github.com/xdotech/gorouter/internal/router"
+	"github.com/xdotech/gorouter/internal/usage"
 )
 
 // Server represents the HTTP gateway server.
@@ -24,6 +24,7 @@ type Server struct {
 	usageDB       *usage.DB
 	rh            *router.Handler // AI routing handler
 	oh            *oauth.Handler  // OAuth handler
+	cxProxy       codexProxy      // on-demand port 1455 proxy for OpenAI OAuth
 	schedulerDone chan struct{}   // signals scheduler goroutine to stop
 }
 
@@ -37,7 +38,11 @@ func NewServer(cfg *config.Config, stores *domain.Stores, dbStore *db.Store, tra
 		usageDB: usageDB,
 		rh:      router.NewHandler(dbStore, tracker),
 		oh:      oauth.NewHandler(dbStore, cfg),
+		cxProxy: codexProxy{port: cfg.Port},
 	}
+
+	// Bridge: OAuth handler also writes to the domain store for API visibility.
+	s.oh.SetDomainStore(stores.Connections)
 
 	handler := s.setupRouter()
 

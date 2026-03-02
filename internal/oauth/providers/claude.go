@@ -13,7 +13,7 @@ const (
 	ClaudeAuthURL     = "https://claude.ai/oauth/authorize"
 	ClaudeTokenURL    = "https://console.anthropic.com/v1/oauth/token"
 	ClaudeClientID    = "9d1c250a-e61b-44d9-88ed-5944d1962f5e"
-	ClaudeRedirectURI = "{baseURL}/api/oauth/cc/callback"
+	ClaudeRedirectURI = "{baseURL}/callback"
 	ClaudeScopes      = "org:create_api_key user:profile user:inference"
 )
 
@@ -44,7 +44,7 @@ func BuildClaudeAuthURL(baseURL, state, codeChallenge string) string {
 
 // ExchangeClaudeCode exchanges an authorization code for tokens.
 // Claude may include a state fragment in the code (code#state).
-func ExchangeClaudeCode(code, verifier, redirectURI string) (*ClaudeTokenResponse, error) {
+func ExchangeClaudeCode(code, verifier, redirectURI, originalState string) (*ClaudeTokenResponse, error) {
 	authCode := code
 	codeState := ""
 	if idx := strings.Index(code, "#"); idx != -1 {
@@ -52,9 +52,15 @@ func ExchangeClaudeCode(code, verifier, redirectURI string) (*ClaudeTokenRespons
 		codeState = code[idx+1:]
 	}
 
+	// Use code fragment state, fallback to original OAuth state (matches 9router)
+	state := codeState
+	if state == "" {
+		state = originalState
+	}
+
 	payload := map[string]string{
 		"code":          authCode,
-		"state":         codeState,
+		"state":         state,
 		"grant_type":    "authorization_code",
 		"client_id":     ClaudeClientID,
 		"redirect_uri":  redirectURI,

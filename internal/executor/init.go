@@ -1,7 +1,7 @@
 package executor
 
 import (
-	"github.com/xuando/gorouter/internal/config"
+	"github.com/xdotech/gorouter/internal/config"
 )
 
 // Init registers all provider executors.
@@ -36,6 +36,11 @@ func Init(cfg *config.Config) {
 	// GitHub Copilot (gh)
 	Register("gh", ghExec)
 	Register("github", ghExec)
+
+	// OpenAI Codex (cx)
+	cxExec := newCodexExecutor(client)
+	Register("cx", cxExec)
+	Register("codex", cxExec)
 }
 
 // GetOrDefault returns the registered Executor for provider, or the default

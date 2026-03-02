@@ -53,31 +53,31 @@ type APIKey struct {
 
 // Settings holds all runtime configuration.
 type Settings struct {
-	CloudEnabled              bool   `json:"cloudEnabled"`
-	TunnelEnabled             bool   `json:"tunnelEnabled"`
-	TunnelURL                 string `json:"tunnelUrl"`
-	FallbackStrategy          string `json:"fallbackStrategy"` // "fill-first" | "round-robin"
-	StickyRoundRobinLimit     int    `json:"stickyRoundRobinLimit"`
-	RequireLogin              bool   `json:"requireLogin"`
-	RequireAPIKey             bool   `json:"requireApiKey"`
-	PasswordHash              string `json:"passwordHash,omitempty"`
-	ObservabilityEnabled      bool   `json:"observabilityEnabled"`
-	ObservabilityMaxRecords   int    `json:"observabilityMaxRecords"`
-	ObservabilityBatchSize    int    `json:"observabilityBatchSize"`
-	ObservabilityFlushIntervalMs int `json:"observabilityFlushIntervalMs"`
-	ObservabilityMaxJSONSize  int    `json:"observabilityMaxJsonSize"`
+	CloudEnabled                 bool   `json:"cloudEnabled"`
+	TunnelEnabled                bool   `json:"tunnelEnabled"`
+	TunnelURL                    string `json:"tunnelUrl"`
+	FallbackStrategy             string `json:"fallbackStrategy"` // "fill-first" | "round-robin"
+	StickyRoundRobinLimit        int    `json:"stickyRoundRobinLimit"`
+	RequireLogin                 bool   `json:"requireLogin"`
+	RequireAPIKey                bool   `json:"requireApiKey"`
+	PasswordHash                 string `json:"passwordHash,omitempty"`
+	ObservabilityEnabled         bool   `json:"observabilityEnabled"`
+	ObservabilityMaxRecords      int    `json:"observabilityMaxRecords"`
+	ObservabilityBatchSize       int    `json:"observabilityBatchSize"`
+	ObservabilityFlushIntervalMs int    `json:"observabilityFlushIntervalMs"`
+	ObservabilityMaxJSONSize     int    `json:"observabilityMaxJsonSize"`
 }
 
 // DBData is the root JSON structure for db.json.
 type DBData struct {
-	ProviderConnections []ProviderConnection  `json:"providerConnections"`
-	ProviderNodes       []ProviderNode        `json:"providerNodes"`
-	ModelAliases        map[string]string     `json:"modelAliases"`
-	MitmAlias           map[string]string     `json:"mitmAlias"`
-	Combos              []Combo               `json:"combos"`
-	APIKeys             []APIKey              `json:"apiKeys"`
-	Settings            Settings              `json:"settings"`
-	Pricing             map[string]float64    `json:"pricing"`
+	ProviderConnections []ProviderConnection `json:"providerConnections"`
+	ProviderNodes       []ProviderNode       `json:"providerNodes"`
+	ModelAliases        map[string]string    `json:"modelAliases"`
+	MitmAlias           map[string]string    `json:"mitmAlias"`
+	Combos              []Combo              `json:"combos"`
+	APIKeys             []APIKey             `json:"apiKeys"`
+	Settings            Settings             `json:"settings"`
+	Pricing             map[string]float64   `json:"pricing"`
 }
 
 // ConnectionFilter is used to query provider connections.
@@ -88,16 +88,16 @@ type ConnectionFilter struct {
 
 func defaultSettings() Settings {
 	return Settings{
-		CloudEnabled:              false,
-		TunnelEnabled:             false,
-		FallbackStrategy:          "fill-first",
-		StickyRoundRobinLimit:     3,
-		RequireLogin:              true,
-		RequireAPIKey:             false,
-		ObservabilityEnabled:      true,
-		ObservabilityMaxRecords:   1000,
-		ObservabilityBatchSize:    20,
+		CloudEnabled:                 false,
+		TunnelEnabled:                false,
+		FallbackStrategy:             "fill-first",
+		StickyRoundRobinLimit:        3,
+		RequireLogin:                 false,
+		RequireAPIKey:                false,
+		ObservabilityEnabled:         true,
+		ObservabilityMaxRecords:      1000,
+		ObservabilityBatchSize:       20,
 		ObservabilityFlushIntervalMs: 5000,
-		ObservabilityMaxJSONSize:  1024,
+		ObservabilityMaxJSONSize:     1024,
 	}
 }

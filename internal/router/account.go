@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xuando/gorouter/internal/db"
-	"github.com/xuando/gorouter/internal/oauth"
+	"github.com/xdotech/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/oauth"
 )
 
 var selectionMu sync.Mutex

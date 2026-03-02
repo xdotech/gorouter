@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/xuando/gorouter/internal/auth"
-	"github.com/xuando/gorouter/internal/db"
-	"github.com/xuando/gorouter/internal/executor"
-	"github.com/xuando/gorouter/internal/oauth"
-	"github.com/xuando/gorouter/internal/translator"
-	"github.com/xuando/gorouter/internal/usage"
+	"github.com/xdotech/gorouter/internal/auth"
+	"github.com/xdotech/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/executor"
+	"github.com/xdotech/gorouter/internal/oauth"
+	"github.com/xdotech/gorouter/internal/translator"
+	"github.com/xdotech/gorouter/internal/usage"
 )
 
 // Handler is the main routing handler wiring model resolution, account selection, and execution.
@@ -101,6 +101,15 @@ func (h *Handler) handleSingleModel(w http.ResponseWriter, ctx context.Context, 
 			CopilotToken:         account.CopilotToken,
 			ProviderSpecificData: account.ProviderSpecificData,
 			ConnectionID:         account.ConnectionID,
+		}
+
+		// Lazy project ID fetch for gemini-cli / antigravity (matches 9router pattern)
+		if (modelInfo.Provider == "gemini-cli" || modelInfo.Provider == "antigravity") && creds.ProjectID == "" {
+			if pid := fetchProjectID(creds.AccessToken); pid != "" {
+				creds.ProjectID = pid
+				// Persist to DB in background
+				go h.store.UpdateProviderConnection(account.ConnectionID, map[string]interface{}{"projectId": pid})
+			}
 		}
 
 		targetFormat := translator.GetTargetFormat(modelInfo.Provider)

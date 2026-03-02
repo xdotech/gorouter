@@ -12,7 +12,7 @@ const (
 	CodexAuthURL     = "https://auth.openai.com/oauth/authorize"
 	CodexTokenURL    = "https://auth.openai.com/oauth/token"
 	CodexClientID    = "app_EMoamEEZ73f0CkXaXp7hrann"
-	CodexRedirectURI = "{baseURL}/api/oauth/cx/callback"
+	CodexRedirectURI = "http://localhost:1455/auth/callback"
 	CodexScope       = "openid profile email offline_access"
 )
 

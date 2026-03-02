@@ -9,12 +9,13 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 const (
-	geminiBaseURL    = "https://cloudcode-pa.googleapis.com/v1/projects/%s/locations/us-central1/publishers/google/models/%s:streamGenerateContent?alt=sse"
-	googleTokenURL   = "https://oauth2.googleapis.com/token"
-	geminiClientID   = "681254865684-mb2p5jgo4qiutapls8r.apps.googleusercontent.com"
+	geminiBaseURL  = "https://cloudcode-pa.googleapis.com/v1internal"
+	googleTokenURL = "https://oauth2.googleapis.com/token"
+	geminiClientID = "681254865684-mb2p5jgo4qiutapls8r.apps.googleusercontent.com"
 )
 
 type geminiCLIExecutor struct {
@@ -26,9 +27,37 @@ func newGeminiCLIExecutor(client *http.Client) *geminiCLIExecutor {
 }
 
 func (e *geminiCLIExecutor) Execute(ctx context.Context, _, model string, bodyBytes []byte, creds Credentials) (*ExecuteResult, error) {
-	endpoint := fmt.Sprintf(geminiBaseURL, creds.ProjectID, model)
+	// Cloud Code API uses v1internal endpoint
+	endpoint := geminiBaseURL + ":streamGenerateContent?alt=sse"
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(bodyBytes))
+	// Parse the translated Gemini body
+	var geminiBody map[string]interface{}
+	if err := json.Unmarshal(bodyBytes, &geminiBody); err != nil {
+		return nil, fmt.Errorf("gemini-cli executor: parse body: %w", err)
+	}
+
+	// Wrap in Cloud Code envelope (matches 9router pattern)
+	envelope := map[string]interface{}{
+		"project":   creds.ProjectID,
+		"model":     model,
+		"userAgent": "gemini-cli",
+		"requestId": fmt.Sprintf("req-%d", time.Now().UnixNano()),
+		"request": map[string]interface{}{
+			"sessionId":         fmt.Sprintf("sess-%d", time.Now().UnixNano()),
+			"contents":          geminiBody["contents"],
+			"systemInstruction": geminiBody["systemInstruction"],
+			"generationConfig":  geminiBody["generationConfig"],
+			"safetySettings":    geminiBody["safetySettings"],
+			"tools":             geminiBody["tools"],
+		},
+	}
+
+	envelopeBytes, err := json.Marshal(envelope)
+	if err != nil {
+		return nil, fmt.Errorf("gemini-cli executor: marshal envelope: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(envelopeBytes))
 	if err != nil {
 		return nil, fmt.Errorf("gemini-cli executor: build request: %w", err)
 	}

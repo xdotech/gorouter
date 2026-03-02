@@ -9,6 +9,16 @@
 > [!IMPORTANT]
 > **OAuth login is designed for personal development and local testing.** OAuth sessions may be subject to provider rate limits and session policies. For production or shared environments, we recommend using official API keys from each provider — they offer better stability, higher quotas, and are intended for programmatic access.
 
+## Screenshots
+
+| Dashboard | Providers |
+|:---------:|:---------:|
+| ![Dashboard Overview](docs/screenshots/dashboard.png) | ![Providers](docs/screenshots/providers.png) |
+
+| Usage Analytics |
+|:---------------:|
+| ![Usage](docs/screenshots/usage.png) |
+
 ## What Makes It Different
 
 - **Zero-Config Multi-Provider** — Connect Claude Code, Gemini CLI, OpenAI, GitHub Copilot, iFlow, Qwen with OAuth in one click — no API keys needed for free tiers

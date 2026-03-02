@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/xuando/gorouter/internal/translator/types"
+	"github.com/xdotech/gorouter/internal/translator/types"
 )
 
 // GeminiStreamTranslator translates Gemini SSE events to OpenAI SSE format.

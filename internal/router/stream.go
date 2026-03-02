@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/xuando/gorouter/internal/translator/types"
+	"github.com/xdotech/gorouter/internal/translator/types"
 )
 
 // StreamResponse pipes upstream SSE body to the client, applying translation.
@@ -17,6 +17,7 @@ func StreamResponse(w http.ResponseWriter, upstreamBody io.ReadCloser, t types.S
 
 	flusher, canFlush := w.(http.Flusher)
 	scanner := bufio.NewScanner(upstreamBody)
+	scanner.Buffer(make([]byte, 1024*1024), 1024*1024) // 1MB buffer for large Codex events
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -34,12 +35,8 @@ func StreamResponse(w http.ResponseWriter, upstreamBody io.ReadCloser, t types.S
 		data := line
 		if strings.HasPrefix(line, "data: ") {
 			data = strings.TrimPrefix(line, "data: ")
-		} else if line == "" || strings.HasPrefix(line, ":") {
-			// Keep-alive or comment — write as-is.
-			writeSSELine(w, line)
-			if canFlush {
-				flusher.Flush()
-			}
+		} else if line == "" || strings.HasPrefix(line, ":") || strings.HasPrefix(line, "event:") {
+			// Keep-alive, comment, or event type marker — skip when translating.
 			continue
 		}
 

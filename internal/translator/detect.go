@@ -77,14 +77,16 @@ func isClaudeStyle(body map[string]interface{}, msgs []interface{}) bool {
 // GetTargetFormat maps a provider identifier to the target format constant.
 func GetTargetFormat(provider string) string {
 	switch provider {
-	case "cc", "kr", "anthropic":
+	case "cc", "kr", "anthropic", "claude-code", "kiro":
 		return FormatClaude
-	case "gc":
+	case "gc", "gemini-cli":
 		return FormatGeminiCLI
 	case "antigravity":
 		return FormatAntigravity
 	case "cursor":
 		return FormatCursor
+	case "cx", "codex":
+		return FormatOpenAIResp
 	default:
 		return FormatOpenAI
 	}

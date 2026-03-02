@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xuando/gorouter/internal/db"
-	"github.com/xuando/gorouter/internal/oauth/providers"
+	"github.com/xdotech/gorouter/internal/db"
+	"github.com/xdotech/gorouter/internal/oauth/providers"
 )
 
 // ─── Configuration ──────────────────────────────────────────────────────────
