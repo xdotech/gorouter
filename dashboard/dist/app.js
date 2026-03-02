@@ -73,6 +73,7 @@ function fmtDate(s) {
 // ── Navigation ─────────────────────────────────────────────
 const pages = {
   dashboard: { load: loadDashboard },
+  chat: { load: () => { } },
   providers: { load: loadProviders },
   combos: { load: loadCombos },
   aliases: { load: loadAliases },
@@ -188,24 +189,61 @@ async function loadProviders() {
       const statusLabel = p.isActive ? 'Active' : (p.testStatus || 'Inactive');
       const authBadge = p.authType === 'oauth' ? '<span class="badge badge-oauth">OAuth</span>' : '<span class="badge badge-apikey">API Key</span>';
       const name = p.name || p.provider;
+      const providerDescs = {
+        'claude-code': 'Anthropic Claude — agentic coding assistant',
+        'gemini-cli': 'Google Gemini CLI — Cloud Code API',
+        'antigravity': 'Google Antigravity — Advanced Agentic Coding',
+        'codex': 'OpenAI Codex — code generation & responses',
+        'github': 'GitHub Copilot — AI pair programmer',
+        'iflow': 'iFlow — Chinese AI coding platform',
+        'qwen': 'Alibaba Qwen — multilingual AI model',
+      };
+      const providerIcons = {
+        'claude-code': 'smart_toy',
+        'gemini-cli': 'auto_awesome',
+        'antigravity': 'rocket_launch',
+        'codex': 'psychology',
+        'github': 'code',
+        'iflow': 'bolt',
+        'qwen': 'devices',
+      };
+      const desc = providerDescs[p.provider] || p.provider;
+      const icon = providerIcons[p.provider] || 'cloud';
+      const expiryInfo = p.expiresAt ? (() => {
+        const exp = new Date(p.expiresAt);
+        const now = new Date();
+        const mins = Math.round((exp - now) / 60000);
+        if (mins < 0) return '<span class="provider-card-expiry expired">Token expired</span>';
+        if (mins < 10) return `<span class="provider-card-expiry expiring">Expires in ${mins}m</span>`;
+        return `<span class="provider-card-expiry valid">Token valid (${mins}m)</span>`;
+      })() : '';
       return `<div class="provider-card">
         <div class="provider-card-top">
-          <div>
+          <div class="provider-card-icon">
+            <span class="material-symbols-outlined">${icon}</span>
+          </div>
+          <div class="provider-card-info">
             <div class="provider-card-name">${esc(name)}</div>
-            <div class="provider-card-id">${esc(p.provider)}</div>
+            <div class="provider-card-desc">${esc(desc)}</div>
           </div>
           <span class="badge badge-${status}">${statusLabel}</span>
         </div>
         <div class="provider-card-meta">
           ${authBadge}
-          ${p.apiKey ? `<span class="badge badge-blue">${esc(p.apiKey)}</span>` : ''}
+          ${p.apiKey ? `<span class="badge badge-blue">${esc(p.apiKey.slice(0, 8))}…</span>` : ''}
+          ${expiryInfo}
           ${p.lastError ? `<span class="badge badge-error" title="${esc(p.lastError)}">Error</span>` : ''}
         </div>
         <div class="provider-card-actions">
-          <button class="btn btn-sm btn-secondary" onclick="toggleProvider('${p.id}', ${!p.isActive})">
-            ${p.isActive ? 'Disable' : 'Enable'}
+          <button class="btn-action btn-action-test" onclick="testProvider('${p.id}')" title="Test connection">
+            <span class="material-symbols-outlined">play_arrow</span>
           </button>
-          <button class="btn btn-sm btn-danger" onclick="deleteProvider('${p.id}')">Delete</button>
+          <button class="btn-action btn-action-toggle" onclick="toggleProvider('${p.id}', ${!p.isActive})" title="${p.isActive ? 'Disable' : 'Enable'}">
+            <span class="material-symbols-outlined">${p.isActive ? 'pause' : 'play_circle'}</span>
+          </button>
+          <button class="btn-action btn-action-delete" onclick="deleteProvider('${p.id}')" title="Delete">
+            <span class="material-symbols-outlined">delete</span>
+          </button>
         </div>
       </div>`;
     }).join('');
@@ -407,7 +445,23 @@ async function loadUsage() {
   try {
     const stats = await api('/usage/providers').catch(() => ({}));
     let html = '';
-    if (stats && typeof stats === 'object') {
+    if (stats && Array.isArray(stats)) {
+      stats.forEach((s) => {
+        const name = s.provider || 'unknown';
+        const reqs = s.requests || s.totalRequests || 0;
+        const tIn = s.tokens_in || s.promptTokens || 0;
+        const tOut = s.tokens_out || s.completionTokens || 0;
+        const cost = s.cost || s.estimatedCost || 0;
+        html += `<div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon blue"><span class="material-symbols-outlined">cloud</span></div>
+            <div class="kpi-label">${esc(name)}</div>
+          </div>
+          <div class="kpi-value">${fmtNum(reqs)}</div>
+          <div class="kpi-sub">${fmtNum(tIn)} in / ${fmtNum(tOut)} out · $${Number(cost).toFixed(4)}</div>
+        </div>`;
+      });
+    } else if (stats && typeof stats === 'object') {
       const entries = Object.entries(stats);
       entries.forEach(([name, s]) => {
         const reqs = s.requests || s.totalRequests || 0;
@@ -606,8 +660,125 @@ function esc(s) {
   return d.innerHTML;
 }
 
-// ── Bootstrap ──────────────────────────────────────────────
+// ── Chat Test ──────────────────────────────────────────────
+const chatHistory = [];
+
+function clearChat() {
+  chatHistory.length = 0;
+  document.getElementById('chatMessages').innerHTML = `
+    <div class="chat-empty">
+      <span class="material-symbols-outlined" style="font-size:48px;color:var(--text-3)">forum</span>
+      <p>Send a message to test your provider.</p>
+    </div>`;
+}
+
+function appendChatBubble(role, content) {
+  const box = document.getElementById('chatMessages');
+  const empty = box.querySelector('.chat-empty');
+  if (empty) empty.remove();
+  const div = document.createElement('div');
+  div.className = `chat-bubble chat-${role}`;
+  div.textContent = content;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
+}
+
+let isSending = false;
+async function sendChat() {
+  if (isSending) return;
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  isSending = true;
+  input.value = '';
+  input.style.height = 'auto';
+
+  appendChatBubble('user', msg);
+  chatHistory.push({ role: 'user', content: msg });
+
+  const model = document.getElementById('chatModel').value;
+  const assistantDiv = appendChatBubble('assistant', '');
+  assistantDiv.innerHTML = '<span class="chat-typing">Thinking…</span>';
+
+  try {
+    const resp = await fetch('/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model,
+        messages: chatHistory,
+        stream: true,
+        max_tokens: 4096
+      })
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      assistantDiv.textContent = `Error ${resp.status}: ${errText}`;
+      assistantDiv.classList.add('chat-error');
+      return;
+    }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    assistantDiv.textContent = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      for (const line of chunk.split('\n')) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(data);
+          const delta = parsed.choices?.[0]?.delta?.content;
+          if (delta) {
+            fullText += delta;
+            assistantDiv.textContent = fullText;
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+          }
+        } catch { }
+      }
+    }
+
+    if (fullText) {
+      chatHistory.push({ role: 'assistant', content: fullText });
+    } else if (!assistantDiv.textContent) {
+      assistantDiv.textContent = '(empty response)';
+      assistantDiv.classList.add('chat-error');
+    }
+  } catch (e) {
+    assistantDiv.textContent = `Network error: ${e.message}`;
+    assistantDiv.classList.add('chat-error');
+  } finally {
+    isSending = false;
+  }
+}
+
+// Enter to send, Shift+Enter for newline + button click
 window.onload = () => {
   const hash = location.hash.replace('#', '');
   navigateTo(pages[hash] ? hash : 'dashboard');
+
+  const chatInput = document.getElementById('chatInput');
+  const btnSend = document.getElementById('btnSendChat');
+  if (chatInput) {
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChat();
+      }
+    });
+    chatInput.addEventListener('input', () => {
+      chatInput.style.height = 'auto';
+      chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+    });
+  }
+  if (btnSend) {
+    btnSend.addEventListener('click', () => sendChat());
+  }
 };

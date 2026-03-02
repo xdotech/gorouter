@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/xdotech/gorouter/dashboard"
+	"github.com/xdotech/gorouter/internal/oauth"
 )
 
 func (s *Server) setupRouter() http.Handler {
@@ -18,6 +19,20 @@ func (s *Server) setupRouter() http.Handler {
 	mux.HandleFunc("GET /api/oauth/{provider}/callback", s.handleOAuthCallback())
 	mux.HandleFunc("POST /api/oauth/{provider}/device-code", s.handleDeviceCode())
 	mux.HandleFunc("POST /api/oauth/{provider}/poll", s.handlePoll())
+
+	// Codex/OpenAI: on-demand proxy on port 1455 (OpenAI only allows localhost:1455)
+	mux.HandleFunc("GET /api/oauth/cx/authorize", s.handleCodexAuthorize())
+	mux.HandleFunc("GET /api/oauth/cx/authcallback", s.handleCodexCallback())
+
+	// Generic /callback for providers that use http://localhost:{port}/callback
+	// (e.g. Claude Code). Looks up provider from OAuth state.
+	mux.HandleFunc("GET /callback", func(w http.ResponseWriter, r *http.Request) {
+		stateID := r.URL.Query().Get("state")
+		if st, ok := oauth.GetState(stateID); ok {
+			r.SetPathValue("provider", st.Provider)
+		}
+		s.oh.Callback(w, r)
+	})
 
 	// ─── Public auth routes ──────────────────────────────────────────────
 	mux.HandleFunc("POST /api/auth/login", s.handleLogin())

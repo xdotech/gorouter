@@ -89,6 +89,9 @@ func (s *Server) handleDeleteProvider() http.HandlerFunc {
 			renderError(w, http.StatusNotFound, "provider not found")
 			return
 		}
+		// Also delete from legacy db.Store so the refresh scheduler's
+		// in-memory copy doesn't re-add the connection on next save.
+		_ = s.dbStore.DeleteProviderConnection(id)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

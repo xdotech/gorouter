@@ -103,6 +103,15 @@ func (h *Handler) handleSingleModel(w http.ResponseWriter, ctx context.Context, 
 			ConnectionID:         account.ConnectionID,
 		}
 
+		// Lazy project ID fetch for gemini-cli / antigravity (matches 9router pattern)
+		if (modelInfo.Provider == "gemini-cli" || modelInfo.Provider == "antigravity") && creds.ProjectID == "" {
+			if pid := fetchProjectID(creds.AccessToken); pid != "" {
+				creds.ProjectID = pid
+				// Persist to DB in background
+				go h.store.UpdateProviderConnection(account.ConnectionID, map[string]interface{}{"projectId": pid})
+			}
+		}
+
 		targetFormat := translator.GetTargetFormat(modelInfo.Provider)
 		sourceFormat := translator.DetectSourceFormat(body)
 

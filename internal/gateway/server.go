@@ -24,6 +24,7 @@ type Server struct {
 	usageDB       *usage.DB
 	rh            *router.Handler // AI routing handler
 	oh            *oauth.Handler  // OAuth handler
+	cxProxy       codexProxy      // on-demand port 1455 proxy for OpenAI OAuth
 	schedulerDone chan struct{}   // signals scheduler goroutine to stop
 }
 
@@ -37,7 +38,11 @@ func NewServer(cfg *config.Config, stores *domain.Stores, dbStore *db.Store, tra
 		usageDB: usageDB,
 		rh:      router.NewHandler(dbStore, tracker),
 		oh:      oauth.NewHandler(dbStore, cfg),
+		cxProxy: codexProxy{port: cfg.Port},
 	}
+
+	// Bridge: OAuth handler also writes to the domain store for API visibility.
+	s.oh.SetDomainStore(stores.Connections)
 
 	handler := s.setupRouter()
 

@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GoRouter Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="/dashboard/favicon.svg">
   <link rel="stylesheet" href="/dashboard/style.css">
 </head>
 
@@ -24,6 +25,9 @@
         <div class="nav-label">Overview</div>
         <button class="nav-item active" data-page="dashboard">
           <span class="material-symbols-outlined">dashboard</span> Dashboard
+        </button>
+        <button class="nav-item" data-page="chat">
+          <span class="material-symbols-outlined">chat</span> Chat Test
         </button>
       </div>
       <div class="nav-group">
@@ -100,14 +104,23 @@
             <a class="oauth-btn" href="/api/oauth/cx/authorize" target="_blank">
               <span class="material-symbols-outlined">psychology</span> OpenAI
             </a>
-            <a class="oauth-btn" href="/api/oauth/gh/authorize" target="_blank">
+            <a class="oauth-btn oauth-btn-disabled"
+              onclick="alert('Coming soon! This provider will be implemented in a future update.'); return false;"
+              href="#" title="Coming Soon">
               <span class="material-symbols-outlined">code</span> GitHub Copilot
+              <span class="badge-coming-soon">Coming Soon</span>
             </a>
-            <a class="oauth-btn" href="/api/oauth/if/authorize" target="_blank">
+            <a class="oauth-btn oauth-btn-disabled"
+              onclick="alert('Coming soon! This provider will be implemented in a future update.'); return false;"
+              href="#" title="Coming Soon">
               <span class="material-symbols-outlined">bolt</span> iFlow
+              <span class="badge-coming-soon">Coming Soon</span>
             </a>
-            <button class="oauth-btn" id="btnQwenDevice">
-              <span class="material-symbols-outlined">devices</span> Qwen (Device Code)
+            <button class="oauth-btn oauth-btn-disabled" id="btnQwenDevice"
+              onclick="alert('Coming soon! This provider will be implemented in a future update.'); return false;"
+              title="Coming Soon">
+              <span class="material-symbols-outlined">devices</span> Qwen
+              <span class="badge-coming-soon">Coming Soon</span>
             </button>
           </div>
         </div>
@@ -265,6 +278,46 @@
         </div>
         <div class="card">
           <div class="card-body" id="settingsForm"></div>
+        </div>
+      </section>
+
+      <!-- ═══ Chat Test ═══ -->
+      <section id="page-chat" class="page">
+        <div class="page-header">
+          <div>
+            <h2>Chat Test</h2>
+            <p>Test your provider connections</p>
+          </div>
+          <button class="chat-clear-btn" onclick="clearChat()" title="Clear chat">
+            <span class="material-symbols-outlined">delete_sweep</span>
+          </button>
+        </div>
+        <div class="chat-container">
+          <div class="chat-messages" id="chatMessages">
+            <div class="chat-empty">
+              <span class="material-symbols-outlined" style="font-size:48px;color:var(--text-3)">forum</span>
+              <p>Send a message to test your provider.</p>
+            </div>
+          </div>
+          <div class="chat-input-bar">
+            <div class="chat-input-wrapper">
+              <textarea id="chatInput" class="form-control" placeholder="Type a message..." rows="1"></textarea>
+              <div class="chat-input-actions">
+                <select id="chatModel" class="chat-model-select">
+                  <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                  <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+                  <option value="claude-sonnet-4-20250514">claude-sonnet-4</option>
+                  <option value="gpt-4o">gpt-4o</option>
+                  <option value="o3-mini">o3-mini</option>
+                  <option value="gpt-5.3-codex">gpt-5.3-codex</option>
+                  <option value="gpt-5.1-codex-mini">gpt-5.1-codex-mini</option>
+                </select>
+                <button class="btn btn-primary chat-send-btn" id="btnSendChat">
+                  <span class="material-symbols-outlined">send</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

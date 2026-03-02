@@ -28,7 +28,7 @@ func TranslateRequest(body map[string]interface{}, sourceFormat, targetFormat st
 		return request.OpenAIToClaude(openAIBody)
 	case FormatGemini, FormatGeminiCLI:
 		return request.OpenAIToGemini(openAIBody)
-	case FormatOpenAI:
+	case FormatOpenAI, FormatOpenAIResp:
 		return openAIBody, nil
 	default:
 		return nil, fmt.Errorf("unsupported target format: %s", targetFormat)
@@ -43,6 +43,8 @@ func NewStreamTranslator(targetFormat, model string) types.StreamTranslator {
 		return response.NewClaudeStreamTranslator(model)
 	case FormatGemini, FormatGeminiCLI:
 		return response.NewGeminiStreamTranslator(model)
+	case FormatOpenAIResp:
+		return response.NewCodexStreamTranslator(model)
 	default:
 		// OpenAI-compatible upstream: no translation needed (passthrough)
 		return nil
